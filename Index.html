@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="el">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>QR προς Rena.pdf</title>
+  <meta name="description" content="Σάρωση QR για άνοιγμα του Rena.pdf" />
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --card: #111827;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #60a5fa;
+      --ring: rgba(96,165,250,.35);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 20% -10%, #14203a 0%, transparent 60%),
+                  radial-gradient(1000px 700px at 120% 0%, #1b2a4b 0%, transparent 60%),
+                  var(--bg);
+      color: var(--text);
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .card {
+      width: min(640px, 100%);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      backdrop-filter: blur(6px);
+    }
+    h1 { font-size: clamp(22px, 3.5vw, 28px); margin: 0 0 12px; }
+    p { color: var(--muted); margin: 0 0 16px; }
+    .row { display:flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+    .qr {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    #qrcode canvas, #qrcode img { width: 256px; height: 256px; display:block; }
+    .actions { display:flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      appearance: none;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.06));
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 600;
+      transition: transform .05s ease, box-shadow .2s ease, border-color .2s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+    .btn:hover { border-color: var(--accent); box-shadow: 0 6px 16px rgba(96,165,250,0.25); }
+    .btn:active { transform: translateY(1px); }
+    code { background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 6px; }
+    .small { font-size: 12px; color: var(--muted); }
+    .link { color: var(--accent); text-decoration: none; border-bottom: 1px dashed var(--accent); }
+    .link:hover { filter: brightness(1.1); }
+  </style>
+</head>
+<body>
+  <main class="card" role="main" aria-labelledby="title">
+    <h1 id="title">QR προς <code>Rena.pdf</code></h1>
+    <p>Σάρωσε το QR με το κινητό για να ανοίξεις απευθείας το αρχείο PDF που είναι στο ίδιο φάκελο με αυτή τη σελίδα (στο GitHub Pages).</p>
+
+    <div class="row" style="margin: 12px 0 18px;">
+      <div id="qrcode" class="qr" aria-label="QR Code προς το PDF"></div>
+      <div style="flex:1; min-width: 220px;">
+        <p>Στόχος σύνδεσμος:</p>
+        <p><a id="pdfLink" class="link" href="#" target="_blank" rel="noopener">—</a></p>
+        <div class="actions" style="margin-top: 10px;">
+          <a id="downloadPng" class="btn" download="Rena-QR.png" href="#">Λήψη QR ως PNG</a>
+          <button id="printBtn" class="btn" type="button">Εκτύπωση</button>
+          <a id="openPdf" class="btn" href="#" target="_blank" rel="noopener">Άνοιγμα PDF</a>
+        </div>
+        <p class="small" style="margin-top: 10px;">Tip: Βάλτε τα αρχεία <code>index.html</code> και <code>Rena.pdf</code> στον ίδιο φάκελο του repo και ενεργοποιήστε GitHub Pages για το branch που τα φιλοξενεί.</p>
+      </div>
+    </div>
+
+    <p class="small">Αν μετακινήσετε/μετονομάσετε το PDF, το QR θα ενημερώνεται αυτόματα καθώς η διεύθυνση δημιουργείται δυναμικά από την τρέχουσα σελίδα.</p>
+  </main>
+
+  <!-- QRCode.js (MIT) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-MrcA3n8nS3x2Yg0V3QowDq0bP+7cK0gg5wH8l6Zy/2w+9m+Vw9sBWJw7wG1z9u8q8b7c2s1n0Y+f7t7zV2F3Lw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    (function () {
+      // Υπολογίζει την απόλυτη διεύθυνση του Rena.pdf με βάση τη θέση της σελίδας
+      const pdfUrl = new URL('Rena.pdf', window.location.href).href;
+
+      // Δημιουργία QR
+      const qrEl = document.getElementById('qrcode');
+      const qr = new QRCode(qrEl, {
+        text: pdfUrl,
+        width: 256,
+        height: 256,
+        correctLevel: QRCode.CorrectLevel.H
+      });
+
+      // Ενημέρωση συνδέσμων UI
+      const link = document.getElementById('pdfLink');
+      link.textContent = pdfUrl;
+      link.href = pdfUrl;
+
+      const openPdf = document.getElementById('openPdf');
+      openPdf.href = pdfUrl;
+
+      // Λήψη PNG του QR
+      const download = document.getElementById('downloadPng');
+      function setDownloadHref() {
+        // Το qrcode.js αρχικά δημιουργεί <table> ή <img>. Ζητάμε canvas για αξιόπιστο PNG.
+        // Αν δημιουργηθεί <img>, το μετατρέπουμε.
+        const img = qrEl.querySelector('img');
+        const canvas = qrEl.querySelector('canvas');
+        if (canvas) {
+          download.href = canvas.toDataURL('image/png');
+        } else if (img && img.src) {
+          // Δημιουργία προσωρινού canvas ώστε να εξάγουμε PNG
+          const c = document.createElement('canvas');
+          c.width = img.naturalWidth || 256;
+          c.height = img.naturalHeight || 256;
+          const ctx = c.getContext('2d');
+          const tmp = new Image();
+          tmp.crossOrigin = 'anonymous';
+          tmp.onload = () => {
+            ctx.drawImage(tmp, 0, 0, c.width, c.height);
+            download.href = c.toDataURL('image/png');
+          };
+          tmp.src = img.src;
+        }
+      }
+      // Δώσε λίγο χρόνο να αποδοθεί το QR πριν πάρουμε PNG
+      setTimeout(setDownloadHref, 100);
+
+      // Εκτύπωση
+      document.getElementById('printBtn').addEventListener('click', () => window.print());
+    })();
+  </script>
+</body>
+</html>
